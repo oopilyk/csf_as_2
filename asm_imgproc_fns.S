@@ -15,6 +15,34 @@
  * them visible to the test code.
  */
 
+	.globl get_r
+get_r:
+	ret
+
+	.globl get_g
+get_g:
+	ret
+
+	.globl get_b
+get_b:
+	ret
+
+	.globl get_a
+get_a:
+	ret
+
+	.globl make_pixel
+make_pixel:
+	ret
+
+	.globl compute_index
+compute_index:
+	ret
+
+	.globl is_in_ellipse
+is_in_ellipse:
+	ret
+
 /*
  * Definitions of image transformation functions
  */
