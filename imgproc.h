@@ -86,6 +86,13 @@ void imgproc_ellipse( struct Image *input_img, struct Image *output_img );
 //!                   transformed pixels should be stored)
 void imgproc_emboss( struct Image *input_img, struct Image *output_img );
 
-// TODO: add prototypes for your helper functions
+// Helper functions for pixel manipulation
+uint32_t get_r( uint32_t pixel );
+uint32_t get_g( uint32_t pixel );
+uint32_t get_b( uint32_t pixel );
+uint32_t get_a( uint32_t pixel );
+uint32_t make_pixel( uint32_t r, uint32_t g, uint32_t b, uint32_t a );
+int32_t compute_index( struct Image *img, int32_t row, int32_t col );
+int is_in_ellipse( struct Image *img, int32_t row, int32_t col );
 
 #endif // IMGPROC_H

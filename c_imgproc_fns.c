@@ -4,7 +4,55 @@
 #include <assert.h>
 #include "imgproc.h"
 
-// TODO: define your helper functions here
+// Helper functions for pixel manipulation
+
+// Extract red component from pixel (bits 24-31)
+uint32_t get_r( uint32_t pixel ) {
+  return (pixel >> 24) & 0xFF;
+}
+
+// Extract green component from pixel (bits 16-23)
+uint32_t get_g( uint32_t pixel ) {
+  return (pixel >> 16) & 0xFF;
+}
+
+// Extract blue component from pixel (bits 8-15)
+uint32_t get_b( uint32_t pixel ) {
+  return (pixel >> 8) & 0xFF;
+}
+
+// Extract alpha component from pixel (bits 0-7)
+uint32_t get_a( uint32_t pixel ) {
+  return pixel & 0xFF;
+}
+
+// Create a pixel
+uint32_t make_pixel( uint32_t r, uint32_t g, uint32_t b, uint32_t a ) {
+  return (r << 24) | (g << 16) | (b << 8) | a;
+}
+
+// Compute array index from row and column
+int32_t compute_index( struct Image *img, int32_t row, int32_t col ) {
+  return row * img->width + col;
+}
+
+// Check if a pixel at (row, col) is inside the ellipse
+int is_in_ellipse( struct Image *img, int32_t row, int32_t col ) {
+  int32_t w = img->width;
+  int32_t h = img->height;
+  int32_t a = w / 2;  // floor(w/2)
+  int32_t b = h / 2;  // floor(h/2)
+  
+  // Distance from center pixel
+  int32_t x = col - a;
+  int32_t y = row - b;
+  
+  // Check ellipse inequality
+  int32_t term1 = (10000 * x * x) / (a * a);
+  int32_t term2 = (10000 * y * y) / (b * b);
+  
+  return (term1 + term2) <= 10000;
+}
 
 //! Transform the color component values in each input pixel
 //! by applying the bitwise complement operation. I.e., each bit
@@ -16,7 +64,26 @@
 //! @param output_img pointer to the output Image (in which the
 //!                   transformed pixels should be stored)
 void imgproc_complement( struct Image *input_img, struct Image *output_img ) {
-  // TODO: implement
+  for ( int32_t row = 0; row < input_img->height; row++ ) {
+    for ( int32_t col = 0; col < input_img->width; col++ ) {
+      int32_t index = compute_index( input_img, row, col );
+      uint32_t pixel = input_img->data[index];
+      
+      // Extract color components
+      uint32_t r = get_r( pixel );
+      uint32_t g = get_g( pixel );
+      uint32_t b = get_b( pixel );
+      uint32_t a = get_a( pixel );  // alpha stays unchanged
+      
+      // invert bits to get complement
+      r = (~r) & 0xFF;
+      g = (~g) & 0xFF;
+      b = (~b) & 0xFF;
+      
+      // Create new pixel and store in output
+      output_img->data[index] = make_pixel( r, g, b, a );
+    }
+  }
 }
 
 //! Transform the input image by swapping the row and column
@@ -34,8 +101,22 @@ void imgproc_complement( struct Image *input_img, struct Image *output_img ) {
 //!         transformation can't be applied because the image
 //!         width and height are not the same
 int imgproc_transpose( struct Image *input_img, struct Image *output_img ) {
-  // TODO: implement
-  return 1;
+  // Check if image is square
+  if ( input_img->width != input_img->height ) {
+    return 0;  // Can't transpose non-square image
+  }
+  
+  // pixel at (i,j) goes to (j,i)
+  for ( int32_t row = 0; row < input_img->height; row++ ) {
+    for ( int32_t col = 0; col < input_img->width; col++ ) {
+      int32_t src_index = compute_index( input_img, row, col );
+      int32_t dst_index = compute_index( output_img, col, row );  // swapped row and col
+      
+      output_img->data[dst_index] = input_img->data[src_index];
+    }
+  }
+  
+  return 1;  // Success
 }
 
 //! Transform the input image by copying only those pixels that are
@@ -58,7 +139,7 @@ int imgproc_transpose( struct Image *input_img, struct Image *output_img ) {
 //! @param output_img pointer to the output Image (in which the
 //!                   transformed pixels should be stored)
 void imgproc_ellipse( struct Image *input_img, struct Image *output_img ) {
-  // TODO: implement
+  //TODO
 }
 
 //! Transform the input image using an "emboss" effect. The pixels
@@ -92,5 +173,5 @@ void imgproc_ellipse( struct Image *input_img, struct Image *output_img ) {
 //! @param output_img pointer to the output Image (in which the
 //!                   transformed pixels should be stored)
 void imgproc_emboss( struct Image *input_img, struct Image *output_img ) {
-  // TODO: implement
-}
+      //TODO
+    }

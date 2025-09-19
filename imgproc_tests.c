@@ -93,7 +93,14 @@ void test_complement_basic( TestObjs *objs );
 void test_transpose_basic( TestObjs *objs );
 void test_ellipse_basic( TestObjs *objs );
 void test_emboss_basic( TestObjs *objs );
-// TODO: add prototypes for additional test functions
+// Test functions for helper functions
+void test_get_r( TestObjs *objs );
+void test_get_g( TestObjs *objs );
+void test_get_b( TestObjs *objs );
+void test_get_a( TestObjs *objs );
+void test_make_pixel( TestObjs *objs );
+void test_compute_index( TestObjs *objs );
+void test_is_in_ellipse( TestObjs *objs );
 
 int main( int argc, char **argv ) {
   // allow the specific test to execute to be specified as the
@@ -106,6 +113,17 @@ int main( int argc, char **argv ) {
   // Run tests.
   // Make sure you add additional TEST() macro invocations
   // for any additional test functions you add.
+  
+  // Test helper functions first
+  TEST( test_get_r );
+  TEST( test_get_g );
+  TEST( test_get_b );
+  TEST( test_get_a );
+  TEST( test_make_pixel );
+  TEST( test_compute_index );
+  TEST( test_is_in_ellipse );
+  
+  // Test main transformation functions
   TEST( test_complement_basic );
   TEST( test_transpose_basic );
   TEST( test_ellipse_basic );
@@ -368,4 +386,117 @@ void test_emboss_basic( TestObjs *objs ) {
   ASSERT( images_equal( objs->smiley_out, smiley_emboss_expected ) );
 
   destroy_img( smiley_emboss_expected );
+}
+
+////////////////////////////////////////////////////////////////////////
+// Helper function tests
+////////////////////////////////////////////////////////////////////////
+
+void test_get_r( TestObjs *objs ) {
+  // Test pixel 0xFF123456 should have red = 0xFF
+  uint32_t pixel = 0xFF123456;
+  ASSERT( get_r( pixel ) == 0xFF );
+  
+  // Test pixel 0x00123456 should have red = 0x00
+  pixel = 0x00123456;
+  ASSERT( get_r( pixel ) == 0x00 );
+  
+  // Test pixel 0x80123456 should have red = 0x80
+  pixel = 0x80123456;
+  ASSERT( get_r( pixel ) == 0x80 );
+}
+
+void test_get_g( TestObjs *objs ) {
+  // Test pixel 0x12FF3456 should have green = 0xFF
+  uint32_t pixel = 0x12FF3456;
+  ASSERT( get_g( pixel ) == 0xFF );
+  
+  // Test pixel 0x12003456 should have green = 0x00
+  pixel = 0x12003456;
+  ASSERT( get_g( pixel ) == 0x00 );
+  
+  // Test pixel 0x12803456 should have green = 0x80
+  pixel = 0x12803456;
+  ASSERT( get_g( pixel ) == 0x80 );
+}
+
+void test_get_b( TestObjs *objs ) {
+  // Test pixel 0x1234FF56 should have blue = 0xFF
+  uint32_t pixel = 0x1234FF56;
+  ASSERT( get_b( pixel ) == 0xFF );
+  
+  // Test pixel 0x12340056 should have blue = 0x00
+  pixel = 0x12340056;
+  ASSERT( get_b( pixel ) == 0x00 );
+  
+  // Test pixel 0x12348056 should have blue = 0x80
+  pixel = 0x12348056;
+  ASSERT( get_b( pixel ) == 0x80 );
+}
+
+void test_get_a( TestObjs *objs ) {
+  // Test pixel 0x123456FF should have alpha = 0xFF
+  uint32_t pixel = 0x123456FF;
+  ASSERT( get_a( pixel ) == 0xFF );
+  
+  // Test pixel 0x12345600 should have alpha = 0x00
+  pixel = 0x12345600;
+  ASSERT( get_a( pixel ) == 0x00 );
+  
+  // Test pixel 0x12345680 should have alpha = 0x80
+  pixel = 0x12345680;
+  ASSERT( get_a( pixel ) == 0x80 );
+}
+
+void test_make_pixel( TestObjs *objs ) {
+  // Test making pixel with r=0xFF, g=0x12, b=0x34, a=0x56
+  uint32_t pixel = make_pixel( 0xFF, 0x12, 0x34, 0x56 );
+  ASSERT( pixel == 0xFF123456 );
+  
+  // Test making pixel with r=0x00, g=0x00, b=0x00, a=0xFF (opaque black)
+  pixel = make_pixel( 0x00, 0x00, 0x00, 0xFF );
+  ASSERT( pixel == 0x000000FF );
+  
+  // Test making pixel with r=0xFF, g=0xFF, b=0xFF, a=0xFF (opaque white)
+  pixel = make_pixel( 0xFF, 0xFF, 0xFF, 0xFF );
+  ASSERT( pixel == 0xFFFFFFFF );
+}
+
+void test_compute_index( TestObjs *objs ) {
+  // Use the square test image (12x12)
+  struct Image *img = objs->sq_test;
+  
+  // Test top-left corner (0,0)
+  ASSERT( compute_index( img, 0, 0 ) == 0 );
+  
+  // Test position (0,5) - should be index 5
+  ASSERT( compute_index( img, 0, 5 ) == 5 );
+  
+  // Test position (1,0) - should be index 12 (width=12)
+  ASSERT( compute_index( img, 1, 0 ) == 12 );
+  
+  // Test position (1,5) - should be index 17 (12 + 5)
+  ASSERT( compute_index( img, 1, 5 ) == 17 );
+  
+  // Test bottom-right corner (11,11) - should be 143 (11*12 + 11)
+  ASSERT( compute_index( img, 11, 11 ) == 143 );
+}
+
+void test_is_in_ellipse( TestObjs *objs ) {
+  // Use the smiley image (16x10)
+  struct Image *img = objs->smiley;
+  
+  // Center should be at (5, 8) for 16x10 image (a=8, b=5)
+  // Center pixel should definitely be in ellipse
+  ASSERT( is_in_ellipse( img, 5, 8 ) == 1 );
+  
+  // Test corners - they should be outside the ellipse
+  ASSERT( is_in_ellipse( img, 0, 0 ) == 0 );
+  ASSERT( is_in_ellipse( img, 0, 15 ) == 0 );
+  ASSERT( is_in_ellipse( img, 9, 0 ) == 0 );
+  ASSERT( is_in_ellipse( img, 9, 15 ) == 0 );
+  
+  // Test some points that should be inside
+  ASSERT( is_in_ellipse( img, 5, 5 ) == 1 );  // Near center
+  ASSERT( is_in_ellipse( img, 5, 10 ) == 1 ); // Near center
 }
