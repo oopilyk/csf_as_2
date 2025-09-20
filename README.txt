@@ -5,6 +5,15 @@ Contributions:
 - Implemented C transformation functions (imgproc_complement, imgproc_transpose)
 - Created unit tests for all helper functions
 
+Team member: Jacob Peery
+- Implemented C transformation functions (imgproc_ellipse, imgproc_emboss)
+- Conducted final testing of functions 
+
+
+
+
 Implementation Details:
 - Used bit shifting and masking for efficient pixel component extraction
 - Implemented proper ellipse equation with integer arithmetic as specified
+
+
