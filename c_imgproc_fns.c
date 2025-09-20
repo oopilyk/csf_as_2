@@ -1,6 +1,7 @@
 // C implementations of image processing functions
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
 #include "imgproc.h"
 
@@ -139,7 +140,17 @@ int imgproc_transpose( struct Image *input_img, struct Image *output_img ) {
 //! @param output_img pointer to the output Image (in which the
 //!                   transformed pixels should be stored)
 void imgproc_ellipse( struct Image *input_img, struct Image *output_img ) {
-  //TODO
+  for ( int32_t row = 0; row < input_img->height; row++ ) {
+    for ( int32_t col = 0; col < input_img->width; col++ ) {
+
+      //if is in ellipse, put in output, else dont
+      if ( is_in_ellipse ( input_img, row, col )) {
+        int32_t index = compute_index( input_img, row, col );
+        output_img->data[index] = input_img->data[index];
+      }
+
+    }
+  }
 }
 
 //! Transform the input image using an "emboss" effect. The pixels
@@ -173,5 +184,38 @@ void imgproc_ellipse( struct Image *input_img, struct Image *output_img ) {
 //! @param output_img pointer to the output Image (in which the
 //!                   transformed pixels should be stored)
 void imgproc_emboss( struct Image *input_img, struct Image *output_img ) {
-      //TODO
+  for ( int32_t row = 0; row < input_img->height; row++ ) {
+    for ( int32_t col = 0; col < input_img->width; col++ ) {
+      int32_t index = compute_index ( input_img, row, col );
+
+      if ( row == 0 || col == 0 ) {
+        output_img->data[index] = make_pixel ( 128, 128, 128, get_a( input_img->data[index] ) );
+        continue;
+      }
+
+      //get pixels for upper left and curr
+      int32_t ul_index = compute_index ( input_img, row - 1, col - 1);
+      uint32_t pixel = input_img->data[index];
+      uint32_t ul_pixel = input_img->data[ul_index];
+
+      //get diffs for r g and b
+      int32_t r_diff = get_r ( ul_pixel ) - get_r ( pixel );
+      int32_t g_diff = get_g ( ul_pixel ) - get_g ( pixel );
+      int32_t b_diff = get_b ( ul_pixel ) - get_b ( pixel );
+
+      //find max diff between the three
+      int32_t diff = r_diff;
+      if ( abs ( g_diff ) > abs ( diff ) ) diff = g_diff;
+      if ( abs ( b_diff ) > abs ( diff ) ) diff = b_diff;
+
+      //find gray value
+      int32_t gray = diff + 128;
+      if ( gray > 255 ) gray = 255;
+      else if (gray < 0 ) gray = 0;
+
+      //put fully gray pixel in output
+      output_img->data[index] = make_pixel ( gray, gray, gray, get_a( input_img->data[index] ) );
+
     }
+  }
+}
