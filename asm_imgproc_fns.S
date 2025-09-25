@@ -45,6 +45,21 @@ get_a:
 	.globl make_pixel
 make_pixel: 
 
+	movl %edi, %eax /* put red value into eax */
+	shll $24, %eax /* put red value into first 8 bits */
+	andl $0xFF000000, %eax /* filter out the rest of the bits so they are 0 */
+
+	shll $16, %esi /* put the green value at the second 8 bits of esi */
+	andl $0xFF0000, %esi /* filter out the rest of the bits so they are 0 */
+	orl %esi, %eax /* put the green value in the second 8 bits of eax */
+
+	shll $8, %edx /* put the blue value in the third 8 bits of edx */
+	andl $0xFF00, %edx /* filter out the rest of the bits so they are 0 */
+	orl %edx, %eax /* put the blue value in the third 8 bits of eax */
+
+	andl $0xFF, %ecx /* filter out the first 24 bits of the alpha value */
+	orl %ecx, %eax /* put the alpha value in the last 8 bits of eax */
+
 	ret
 
 	.globl compute_index
