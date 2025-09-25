@@ -17,22 +17,34 @@
 
 	.globl get_r
 get_r:
+	movl %edi, %eax /* argument is the pixel, so its in %edi as a 32 bit unit, move it to eax to be returned */
+	shrl $24, %eax /* shift the bits right 24 to get the first 8 bits */
+	andl $0xFF, %eax /* filter out the first 24 bits of the new uint post shift for the red value */
 	ret
 
 	.globl get_g
 get_g:
+	movl %edi, %eax /* argument is the pixel, so its in %edi as a 32 bit unit, move it to eax to be returned */
+	shrl $16, %eax /* shift the bits right 16 to get the second 8 bits */
+	andl $0xFF, %eax /* filter out the first 24 bits of the new uint post shift for the green value */
 	ret
 
 	.globl get_b
 get_b:
+	movl %edi, %eax /* argument is the pixel, so its in %edi as a 32 bit unit, move it to eax to be returned */
+	shrl $8, %eax /* shift the bits right 8 to get the third 8 bits */
+	andl $0xFF, %eax /* filter out the first 24 bits of the new uint post shift for the blue value */
 	ret
 
 	.globl get_a
 get_a:
+	movl %edi, %eax /* argument is the pixel, so its in %edi as a 32 bit unit, move it to eax to be returned */
+	andl $0xFF, %eax /* filter out the first 24 bits of uint for the alpha value */
 	ret
 
 	.globl make_pixel
-make_pixel:
+make_pixel: 
+
 	ret
 
 	.globl compute_index
