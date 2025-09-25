@@ -67,7 +67,7 @@ compute_index:
 	/*
 	 * Compute array index from row and column
 	 * Parameters:
-	 *   %rdi - pointer to Image struct
+	 *   %rdi - pointer to image struct
 	 *   %esi - row (32-bit)
 	 *   %edx - col (32-bit)
 	 * Returns:
@@ -103,8 +103,8 @@ imgproc_complement:
 	/*
 	 * Transform color components using bitwise complement
 	 * Parameters:
-	 *   %rdi - pointer to input Image
-	 *   %rsi - pointer to output Image
+	 *   %rdi - pointer to input image
+	 *   %rsi - pointer to output image
 	 * 
 	 * Register use:
 	 *   %r12 - input Image pointer
@@ -114,7 +114,7 @@ imgproc_complement:
 	 *   %ebx - current pixel value
 	 */
 	
-	/* prologue - save callee-saved registers */
+	/* save callee-saved registers */
 	pushq %rbp
 	movq %rsp, %rbp
 	pushq %r12
@@ -124,8 +124,8 @@ imgproc_complement:
 	pushq %rbx
 	
 	/* save parameters */
-	movq %rdi, %r12          /* input Image pointer */
-	movq %rsi, %r13          /* output Image pointer */
+	movq %rdi, %r12          /* input image pointer */
+	movq %rsi, %r13          /* output image pointer */
 	
 	/* initialize row counter */
 	movl $0, %r14d
