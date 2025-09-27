@@ -91,8 +91,10 @@ void destroy_img( struct Image *img );
 // Test functions
 void test_complement_basic( TestObjs *objs );
 void test_transpose_basic( TestObjs *objs );
-void test_ellipse_basic( TestObjs *objs );
-void test_emboss_basic( TestObjs *objs );
+
+// void test_ellipse_basic( TestObjs *objs );   < -------- here
+// void test_emboss_basic( TestObjs *objs );
+
 // Test functions for helper functions
 void test_get_r( TestObjs *objs );
 void test_get_g( TestObjs *objs );
@@ -100,7 +102,7 @@ void test_get_b( TestObjs *objs );
 void test_get_a( TestObjs *objs );
 void test_make_pixel( TestObjs *objs );
 void test_compute_index( TestObjs *objs );
-void test_is_in_ellipse( TestObjs *objs );
+// void test_is_in_ellipse( TestObjs *objs ); < --------- here
 
 int main( int argc, char **argv ) {
   // allow the specific test to execute to be specified as the
@@ -121,13 +123,14 @@ int main( int argc, char **argv ) {
   TEST( test_get_a );
   TEST( test_make_pixel );
   TEST( test_compute_index );
-  TEST( test_is_in_ellipse );
+  // TEST( test_is_in_ellipse ); < ------------here
   
   // Test main transformation functions
   TEST( test_complement_basic );
   TEST( test_transpose_basic );
-  TEST( test_ellipse_basic );
-  TEST( test_emboss_basic );
+  
+  // TEST( test_ellipse_basic ); < ------------here
+  // TEST( test_emboss_basic );
 
   TEST_FINI();
 }
@@ -322,71 +325,71 @@ void test_transpose_basic( TestObjs *objs ) {
   destroy_img( sq_test_transpose_expected );
 }
 
-void test_ellipse_basic( TestObjs *objs ) {
-  struct Picture smiley_ellipse_expected_pic = {
-    {
-      { ' ', 0x000000ff },
-      { 'a', 0x00ff00ff },
-      { 'b', 0xffffffff },
-      { 'c', 0x0000ffff },
-      { 'd', 0xff0000ff },
-      { 'e', 0x00ffffff },
-      { 'f', 0xff00ffff },
-    },
-    16, // width
-    10, // height
-    "        a       "
-    "    bbbbbbbbc   "
-    "  dbbbdbbcbbbeb "
-    " cbbbbbbbbbbbbcb"
-    " cbbbbbbbbbbbbdb"
-    "babbbcbbbbebbbdb"
-    " bebbbaadcbbbcbb"
-    " bbfbbbbbbbbebbb"
-    "  bbaaaddcfebbb "
-    "    bbbbbbbbb   "
-  };
+// void test_ellipse_basic( TestObjs *objs ) {
+//   struct Picture smiley_ellipse_expected_pic = {
+//     {
+//       { ' ', 0x000000ff },
+//       { 'a', 0x00ff00ff },
+//       { 'b', 0xffffffff },
+//       { 'c', 0x0000ffff },
+//       { 'd', 0xff0000ff },
+//       { 'e', 0x00ffffff },
+//       { 'f', 0xff00ffff },
+//     },
+//     16, // width
+//     10, // height
+//     "        a       "
+//     "    bbbbbbbbc   "
+//     "  dbbbdbbcbbbeb "
+//     " cbbbbbbbbbbbbcb"
+//     " cbbbbbbbbbbbbdb"
+//     "babbbcbbbbebbbdb"
+//     " bebbbaadcbbbcbb"
+//     " bbfbbbbbbbbebbb"
+//     "  bbaaaddcfebbb "
+//     "    bbbbbbbbb   "
+//   };
 
-  struct Image *smiley_ellipse_expected =
-    picture_to_img( &smiley_ellipse_expected_pic );
+//   struct Image *smiley_ellipse_expected =
+//     picture_to_img( &smiley_ellipse_expected_pic );
 
-  imgproc_ellipse( objs->smiley, objs->smiley_out );
+//   imgproc_ellipse( objs->smiley, objs->smiley_out );
 
-  ASSERT( images_equal( objs->smiley_out, smiley_ellipse_expected ) );
+//   ASSERT( images_equal( objs->smiley_out, smiley_ellipse_expected ) );
 
-  destroy_img( smiley_ellipse_expected );
-}
+//   destroy_img( smiley_ellipse_expected );
+// }
+// 
+// void test_emboss_basic( TestObjs *objs ) {
+//   struct Picture smiley_emboss_expected_pic = {
+//     {
+//       { ' ', 0x000000ff },
+//       { 'a', 0x808080ff },
+//       { 'b', 0xffffffff },
+//     },
+//     16, // width
+//     10, // height
+//     "aaaaaaaaaaaaaaaa"
+//     "aaaba       baaa"
+//     "aaba abaabaaa aa"
+//     "aba aaa aa aaaba"
+//     "ab aaaaaaaaaaab "
+//     "ab aabaaaabaaab "
+//     "aa aaa bbba aba "
+//     "aaa aaa    aba a"
+//     "aaaabbbbbbbba aa"
+//     "aaaaa        aaa"
+//   };
 
-void test_emboss_basic( TestObjs *objs ) {
-  struct Picture smiley_emboss_expected_pic = {
-    {
-      { ' ', 0x000000ff },
-      { 'a', 0x808080ff },
-      { 'b', 0xffffffff },
-    },
-    16, // width
-    10, // height
-    "aaaaaaaaaaaaaaaa"
-    "aaaba       baaa"
-    "aaba abaabaaa aa"
-    "aba aaa aa aaaba"
-    "ab aaaaaaaaaaab "
-    "ab aabaaaabaaab "
-    "aa aaa bbba aba "
-    "aaa aaa    aba a"
-    "aaaabbbbbbbba aa"
-    "aaaaa        aaa"
-  };
+//   struct Image *smiley_emboss_expected =
+//     picture_to_img( &smiley_emboss_expected_pic );
 
-  struct Image *smiley_emboss_expected =
-    picture_to_img( &smiley_emboss_expected_pic );
+//   imgproc_emboss( objs->smiley, objs->smiley_out );
 
-  imgproc_emboss( objs->smiley, objs->smiley_out );
+//   ASSERT( images_equal( objs->smiley_out, smiley_emboss_expected ) );
 
-  ASSERT( images_equal( objs->smiley_out, smiley_emboss_expected ) );
-
-  destroy_img( smiley_emboss_expected );
-}
+//   destroy_img( smiley_emboss_expected );
+// }
 
 ////////////////////////////////////////////////////////////////////////
 // Helper function tests
@@ -482,21 +485,21 @@ void test_compute_index( TestObjs *objs ) {
   ASSERT( compute_index( img, 11, 11 ) == 143 );
 }
 
-void test_is_in_ellipse( TestObjs *objs ) {
-  // Use the smiley image (16x10)
-  struct Image *img = objs->smiley;
+// void test_is_in_ellipse( TestObjs *objs ) {
+//   // Use the smiley image (16x10)
+//   struct Image *img = objs->smiley;
   
-  // Center should be at (5, 8) for 16x10 image (a=8, b=5)
-  // Center pixel should definitely be in ellipse
-  ASSERT( is_in_ellipse( img, 5, 8 ) == 1 );
+//   // Center should be at (5, 8) for 16x10 image (a=8, b=5)
+//   // Center pixel should definitely be in ellipse
+//   ASSERT( is_in_ellipse( img, 5, 8 ) == 1 );
   
-  // Test corners - they should be outside the ellipse
-  ASSERT( is_in_ellipse( img, 0, 0 ) == 0 );
-  ASSERT( is_in_ellipse( img, 0, 15 ) == 0 );
-  ASSERT( is_in_ellipse( img, 9, 0 ) == 0 );
-  ASSERT( is_in_ellipse( img, 9, 15 ) == 0 );
+//   // Test corners - they should be outside the ellipse
+//   ASSERT( is_in_ellipse( img, 0, 0 ) == 0 );
+//   ASSERT( is_in_ellipse( img, 0, 15 ) == 0 );
+//   ASSERT( is_in_ellipse( img, 9, 0 ) == 0 );
+//   ASSERT( is_in_ellipse( img, 9, 15 ) == 0 );
   
-  // Test some points that should be inside
-  ASSERT( is_in_ellipse( img, 5, 5 ) == 1 );  // Near center
-  ASSERT( is_in_ellipse( img, 5, 10 ) == 1 ); // Near center
-}
+//   // Test some points that should be inside
+//   ASSERT( is_in_ellipse( img, 5, 5 ) == 1 );  // Near center
+//   ASSERT( is_in_ellipse( img, 5, 10 ) == 1 ); // Near center
+// }

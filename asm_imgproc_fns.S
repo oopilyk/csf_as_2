@@ -100,12 +100,8 @@ is_in_ellipse:
  */
 	.globl imgproc_complement
 imgproc_complement:
+
 	/*
-	 * Transform color components using bitwise complement
-	 * Parameters:
-	 *   %rdi - pointer to input image
-	 *   %rsi - pointer to output image
-	 * 
 	 * Register use:
 	 *   %r12 - input Image pointer
 	 *   %r13 - output Image pointer
@@ -123,94 +119,86 @@ imgproc_complement:
 	pushq %r15
 	pushq %rbx
 	
-	/* save parameters */
-	movq %rdi, %r12          /* input image pointer */
-	movq %rsi, %r13          /* output image pointer */
+	movq %rdi, %r12 /* input image pointer */
+	movq %rsi, %r13 /* output image pointer */
 	
-	/* initialize row counter */
-	movl $0, %r14d
+	movl $0, %r14d /* initialize row counter */
+
 	
 .Lcomplement_row_loop:
-	/* check if row < height */
-	movl IMAGE_HEIGHT_OFFSET(%r12), %eax
-	cmpl %eax, %r14d
-	jge .Lcomplement_done
+
+	// check if row < height
+	movl IMAGE_HEIGHT_OFFSET(%r12), %eax /* put the height of the input into eax */
+	cmpl %eax, %r14d /* check if the current row is greater than the total height */
+	jge .Lcomplement_done /* if greater than or equal to, jump to end of loop */
 	
-	/* initialize column counter */
-	movl $0, %r15d
-	
+	movl $0, %r15d /* initialize column counter */
+
 .Lcomplement_col_loop:
-	/* check if col < width */
-	movl IMAGE_WIDTH_OFFSET(%r12), %eax
-	cmpl %eax, %r15d
-	jge .Lcomplement_next_row
+
+	// check if col < width
+	movl IMAGE_WIDTH_OFFSET(%r12), %eax /* move the width to eax */
+	cmpl %eax, %r15d /* check if current column is greater than total width */
+	jge .Lcomplement_next_row /*if greater, go to next row */
 	
-	/* compute index = row * width + col */
-	movq %r12, %rdi          /* Image pointer */
-	movl %r14d, %esi         /* row */
-	movl %r15d, %edx         /* col */
-	call compute_index
-	movl %eax, %ecx          /* save index in %ecx */
+	// compute index = row * width + col
+	movq %r12, %rdi /* move image pointer to rdi */
+	movl %r14d, %esi /* move current row to esi */
+	movl %r15d, %edx /* col current column to edx */
+	call compute_index /* get the index of the pixel with the parameters just given */
+	movl %eax, %ecx /* save index in %ecx in order to load pixel on line 153 */
 	
-	/* load pixel from input image */
-	movq IMAGE_DATA_OFFSET(%r12), %rax  /* get data pointer */
-	movl (%rax,%rcx,4), %ebx            /* load pixel at index */
+	// load pixel from input image
+	movq IMAGE_DATA_OFFSET(%r12), %rax /* put data pointer for the input image into rax */
+	movl (%rax,%rcx,4), %ebx /* move the current pixel at index into ebx */
 	
-	/* extract RGBA components */
-	movl %ebx, %edi
+	// extract RGBA components
+	movl %ebx, %edi /* put pixel in edi, can do this once cause pixel needed for parameter stays the same for each call*/
 	call get_r
-	movl %eax, %r8d          /* red in %r8d */
-	
-	movl %ebx, %edi
+	movl %eax, %r8d /* put the red value into in %r8d */
 	call get_g
-	movl %eax, %r9d          /* green in %r9d */
-	
-	movl %ebx, %edi
+	movl %eax, %r9d /* green into %r9d */
 	call get_b
-	movl %eax, %r10d         /* blue in %r10d */
-	
-	movl %ebx, %edi
+	movl %eax, %r10d /* blue into %r10d */
 	call get_a
-	movl %eax, %r11d         /* alpha in %r11d */
+	movl %eax, %r11d /* alpha into %r11d */
 	
-	/* complement RGB components */
-	notl %r8d                /* complement red */
-	andl $0xFF, %r8d         /* mask to 8 bits */
+	// complement RGB components
+	notl %r8d /* complement red */
+	andl $0xFF, %r8d /* mask to 8 bits */
+	notl %r9d /* complement green */
+	andl $0xFF, %r9d /* mask to 8 bits */
+	notl %r10d /* complement blue */
+	andl $0xFF, %r10d /* mask to 8 bits */
 	
-	notl %r9d                /* complement green */
-	andl $0xFF, %r9d         /* mask to 8 bits */
-	
-	notl %r10d               /* complement blue */
-	andl $0xFF, %r10d        /* mask to 8 bits */
-	
-	/* create new pixel */
-	movl %r8d, %edi          /* red */
-	movl %r9d, %esi          /* green */
-	movl %r10d, %edx         /* blue */
-	movl %r11d, %ecx         /* alpha (unchanged) */
+	// create new pixel
+	movl %r8d, %edi /* red */
+	movl %r9d, %esi /* green */
+	movl %r10d, %edx /* blue */
+	movl %r11d, %ecx /* alpha (unchanged) */
 	call make_pixel
 	
-	/* store pixel in output image */
-	movq %r12, %rdi          /* Image pointer for index calc */
-	movl %r14d, %esi         /* row */
-	movl %r15d, %edx         /* col */
-	pushq %rax               /* save pixel value */
+	// store pixel in output image
+	movq %r12, %rdi /* image pointer for index calc */
+	movl %r14d, %esi /* row */
+	movl %r15d, %edx /* col */
+	pushq %rax /* save pixel value */
 	call compute_index
-	popq %rdx                /* restore pixel value to %rdx */
-	movq IMAGE_DATA_OFFSET(%r13), %rcx  /* get output data pointer */
-	movl %edx, (%rcx,%rax,4)            /* store pixel */
+	popq %rdx /* restore pixel value to %rdx */
+	movq IMAGE_DATA_OFFSET(%r13), %rcx /* get output data pointer */
+	movl %edx, (%rcx,%rax,4) /* store pixel */
 	
-	/* increment column */
-	incl %r15d
+	incl %r15d /* increment column */
 	jmp .Lcomplement_col_loop
 	
 .Lcomplement_next_row:
-	/* increment row */
-	incl %r14d
+
+	incl %r14d /* increment row */
 	jmp .Lcomplement_row_loop
 	
 .Lcomplement_done:
-	/* epilogue - restore callee-saved registers */
+
+	/* epilogue, restore the callee saved registers */
 	popq %rbx
 	popq %r15
 	popq %r14
@@ -238,14 +226,8 @@ imgproc_complement:
  */
 	.globl imgproc_transpose
 imgproc_transpose:
+
 	/*
-	 * Transform image by swapping rows and columns
-	 * Parameters:
-	 *   %rdi - pointer to input Image
-	 *   %rsi - pointer to output Image
-	 * Returns:
-	 *   %eax - 1 if successful, 0 if image not square
-	 * 
 	 * Register use:
 	 *   %r12 - input Image pointer
 	 *   %r13 - output Image pointer
@@ -253,7 +235,7 @@ imgproc_transpose:
 	 *   %r15d - current column
 	 */
 	
-	/* prologue - save callee-saved registers */
+	// prologue, save callee saved registers
 	pushq %rbp
 	movq %rsp, %rbp
 	pushq %r12
@@ -261,75 +243,75 @@ imgproc_transpose:
 	pushq %r14
 	pushq %r15
 	
-	/* save parameters */
-	movq %rdi, %r12          /* input Image pointer */
-	movq %rsi, %r13          /* output Image pointer */
+	// save parameters
+	movq %rdi, %r12 /* input Image pointer */
+	movq %rsi, %r13 /* output Image pointer */
 	
-	/* check if image is square */
-	movl IMAGE_WIDTH_OFFSET(%r12), %eax
-	movl IMAGE_HEIGHT_OFFSET(%r12), %edx
-	cmpl %edx, %eax
-	jne .Ltranspose_not_square
+	// check if image is square 
+	movl IMAGE_WIDTH_OFFSET(%r12), %eax /* put the width into eax */
+	movl IMAGE_HEIGHT_OFFSET(%r12), %edx /* put the height into edx */
+	cmpl %edx, %eax /* compare them */
+	jne .Ltranspose_not_square /* if they are different, go to case where not square, return error */
 	
-	/* initialize row counter */
-	movl $0, %r14d
+	movl $0, %r14d /* initialize row counter */
 	
 .Ltranspose_row_loop:
-	/* check if row < height */
-	movl IMAGE_HEIGHT_OFFSET(%r12), %eax
-	cmpl %eax, %r14d
-	jge .Ltranspose_success
+
+	// check if row < height 
+	movl IMAGE_HEIGHT_OFFSET(%r12), %eax /* put the height into eax */
+	cmpl %eax, %r14d /* compare height and current row */
+	jge .Ltranspose_success /* if current row greater than or equal to, successful, end loop */
 	
-	/* initialize column counter */
-	movl $0, %r15d
-	
+	movl $0, %r15d /* initialize column counter */
+
 .Ltranspose_col_loop:
-	/* check if col < width */
-	movl IMAGE_WIDTH_OFFSET(%r12), %eax
-	cmpl %eax, %r15d
-	jge .Ltranspose_next_row
+
+	// check if col < width
+	movl IMAGE_WIDTH_OFFSET(%r12), %eax /* put width into eax */
+	cmpl %eax, %r15d /* compare current col and width */
+	jge .Ltranspose_next_row /* if current col is greater or equal to, go to next row */
 	
-	/* compute source index = row * width + col */
-	movq %r12, %rdi          /* Image pointer */
-	movl %r14d, %esi         /* row */
-	movl %r15d, %edx         /* col */
+	// compute source index = row * width + col
+	movq %r12, %rdi /* Image pointer */
+	movl %r14d, %esi /* row */
+	movl %r15d, %edx /* col */
 	call compute_index
-	movl %eax, %ecx          /* source index in %ecx */
+	movl %eax, %ecx /* source index in %ecx */
 	
-	/* load pixel from input image */
-	movq IMAGE_DATA_OFFSET(%r12), %rax  /* get input data pointer */
-	movl (%rax,%rcx,4), %ebx            /* load source pixel */
+	// load pixel from input image
+	movq IMAGE_DATA_OFFSET(%r12), %rax /* get input data pointer */
+	movl (%rax,%rcx,4), %ebx /* load source pixel */
 	
-	/* compute destination index = col * width + row (swapped) */
-	movq %r13, %rdi          /* output Image pointer */
-	movl %r15d, %esi         /* col (becomes row) */
-	movl %r14d, %edx         /* row (becomes col) */
+	// compute destination index = col * width + row (swapped)
+	movq %r13, %rdi /* output Image pointer */
+	movl %r15d, %esi /* col (becomes row) */
+	movl %r14d, %edx /* row (becomes col) */
 	call compute_index
-	movl %eax, %ecx          /* destination index in %ecx */
+	movl %eax, %ecx /* destination index in %ecx */
 	
-	/* store pixel in output image */
-	movq IMAGE_DATA_OFFSET(%r13), %rax  /* get output data pointer */
-	movl %ebx, (%rax,%rcx,4)            /* store pixel at destination */
+	// store pixel in output image 
+	movq IMAGE_DATA_OFFSET(%r13), %rax /* get output data pointer */
+	movl %ebx, (%rax,%rcx,4) /* store pixel at destination */
 	
-	/* increment column */
-	incl %r15d
+	incl %r15d /* increment col, restart col loop */
 	jmp .Ltranspose_col_loop
 	
 .Ltranspose_next_row:
-	/* increment row */
-	incl %r14d
+
+	incl %r14d /* increment row, restart row loop */
 	jmp .Ltranspose_row_loop
 	
 .Ltranspose_success:
-	/* return 1 for success */
-	movl $1, %eax
+
+	movl $1, %eax /* return 1 for success */
 	jmp .Ltranspose_done
 	
 .Ltranspose_not_square:
-	/* return 0 for failure */
-	movl $0, %eax
+
+	movl $0, %eax /* return 0 for failure */
 	
 .Ltranspose_done:
+
 	/* epilogue - restore callee-saved registers */
 	popq %r15
 	popq %r14
