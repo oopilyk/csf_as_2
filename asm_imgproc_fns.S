@@ -500,7 +500,7 @@ imgproc_ellipse:
 	movl %r14d, %esi         /* row */
 	movl %r15d, %edx         /* col */
 	call compute_index
-	movl %eax, %ecx          /* save index in %ecx */
+	pushq %rax               /* save index on stack */
 	
 	/* check if pixel is in ellipse */
 	movq %r12, %rdi          /* Image pointer */
@@ -522,18 +522,14 @@ imgproc_ellipse:
 .Lellipse_copy_pixel:
 	/* inside ellipse - copy original pixel */
 	movq IMAGE_DATA_OFFSET(%r12), %rax  /* get input data pointer */
+	movq (%rsp), %rcx                   /* restore index from stack */
 	movl (%rax,%rcx,4), %ebx            /* load original pixel */
 	
 .Lellipse_store_pixel:
 	/* store pixel in output image */
-	movq %r12, %rdi          /* Image pointer for index calc */
-	movl %r14d, %esi         /* row */
-	movl %r15d, %edx         /* col */
-	pushq %rbx               /* save pixel value */
-	call compute_index
-	popq %rdx                /* restore pixel value to %rdx */
+	popq %rax                           /* restore index from stack */
 	movq IMAGE_DATA_OFFSET(%r13), %rcx  /* get output data pointer */
-	movl %edx, (%rcx,%rax,4)            /* store pixel */
+	movl %ebx, (%rcx,%rax,4)            /* store pixel */
 	
 	/* increment column */
 	incl %r15d
