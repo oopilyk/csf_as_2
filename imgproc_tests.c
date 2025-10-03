@@ -92,7 +92,7 @@ void destroy_img( struct Image *img );
 void test_complement_basic( TestObjs *objs );
 void test_transpose_basic( TestObjs *objs );
 
-// void test_ellipse_basic( TestObjs *objs );   < -------- here
+void test_ellipse_basic( TestObjs *objs );
 // void test_emboss_basic( TestObjs *objs );
 
 // Test functions for helper functions
@@ -325,40 +325,40 @@ void test_transpose_basic( TestObjs *objs ) {
   destroy_img( sq_test_transpose_expected );
 }
 
-// void test_ellipse_basic( TestObjs *objs ) {
-//   struct Picture smiley_ellipse_expected_pic = {
-//     {
-//       { ' ', 0x000000ff },
-//       { 'a', 0x00ff00ff },
-//       { 'b', 0xffffffff },
-//       { 'c', 0x0000ffff },
-//       { 'd', 0xff0000ff },
-//       { 'e', 0x00ffffff },
-//       { 'f', 0xff00ffff },
-//     },
-//     16, // width
-//     10, // height
-//     "        a       "
-//     "    bbbbbbbbc   "
-//     "  dbbbdbbcbbbeb "
-//     " cbbbbbbbbbbbbcb"
-//     " cbbbbbbbbbbbbdb"
-//     "babbbcbbbbebbbdb"
-//     " bebbbaadcbbbcbb"
-//     " bbfbbbbbbbbebbb"
-//     "  bbaaaddcfebbb "
-//     "    bbbbbbbbb   "
-//   };
+void test_ellipse_basic( TestObjs *objs ) {
+  struct Picture smiley_ellipse_expected_pic = {
+    {
+      { ' ', 0x000000ff },
+      { 'a', 0x00ff00ff },
+      { 'b', 0xffffffff },
+      { 'c', 0x0000ffff },
+      { 'd', 0xff0000ff },
+      { 'e', 0x00ffffff },
+      { 'f', 0xff00ffff },
+    },
+    16, // width
+    10, // height
+    "        a       "
+    "    bbbbbbbbc   "
+    "  dbbbdbbcbbbeb "
+    " cbbbbbbbbbbbbcb"
+    " cbbbbbbbbbbbbdb"
+    "babbbcbbbbebbbdb"
+    " bebbbaadcbbbcbb"
+    " bbfbbbbbbbbebbb"
+    "  bbaaaddcfebbb "
+    "    bbbbbbbbb   "
+  };
 
-//   struct Image *smiley_ellipse_expected =
-//     picture_to_img( &smiley_ellipse_expected_pic );
+  struct Image *smiley_ellipse_expected =
+    picture_to_img( &smiley_ellipse_expected_pic );
 
-//   imgproc_ellipse( objs->smiley, objs->smiley_out );
+  imgproc_ellipse( objs->smiley, objs->smiley_out );
 
-//   ASSERT( images_equal( objs->smiley_out, smiley_ellipse_expected ) );
+  ASSERT( images_equal( objs->smiley_out, smiley_ellipse_expected ) );
 
-//   destroy_img( smiley_ellipse_expected );
-// }
+  destroy_img( smiley_ellipse_expected );
+}
 // 
 // void test_emboss_basic( TestObjs *objs ) {
 //   struct Picture smiley_emboss_expected_pic = {
