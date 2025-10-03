@@ -102,7 +102,7 @@ void test_get_b( TestObjs *objs );
 void test_get_a( TestObjs *objs );
 void test_make_pixel( TestObjs *objs );
 void test_compute_index( TestObjs *objs );
-// void test_is_in_ellipse( TestObjs *objs ); < --------- here
+void test_is_in_ellipse( TestObjs *objs );
 
 int main( int argc, char **argv ) {
   // allow the specific test to execute to be specified as the
@@ -123,13 +123,13 @@ int main( int argc, char **argv ) {
   TEST( test_get_a );
   TEST( test_make_pixel );
   TEST( test_compute_index );
-  // TEST( test_is_in_ellipse ); < ------------here
+  TEST( test_is_in_ellipse );
   
   // Test main transformation functions
   TEST( test_complement_basic );
   TEST( test_transpose_basic );
   
-  // TEST( test_ellipse_basic ); < ------------here
+  TEST( test_ellipse_basic );
   // TEST( test_emboss_basic );
 
   TEST_FINI();
@@ -485,21 +485,21 @@ void test_compute_index( TestObjs *objs ) {
   ASSERT( compute_index( img, 11, 11 ) == 143 );
 }
 
-// void test_is_in_ellipse( TestObjs *objs ) {
-//   // Use the smiley image (16x10)
-//   struct Image *img = objs->smiley;
+void test_is_in_ellipse( TestObjs *objs ) {
+  // Use the smiley image (16x10)
+  struct Image *img = objs->smiley;
   
-//   // Center should be at (5, 8) for 16x10 image (a=8, b=5)
-//   // Center pixel should definitely be in ellipse
-//   ASSERT( is_in_ellipse( img, 5, 8 ) == 1 );
+  // Center should be at (5, 8) for 16x10 image (a=8, b=5)
+  // Center pixel should definitely be in ellipse
+  ASSERT( is_in_ellipse( img, 5, 8 ) == 1 );
   
-//   // Test corners - they should be outside the ellipse
-//   ASSERT( is_in_ellipse( img, 0, 0 ) == 0 );
-//   ASSERT( is_in_ellipse( img, 0, 15 ) == 0 );
-//   ASSERT( is_in_ellipse( img, 9, 0 ) == 0 );
-//   ASSERT( is_in_ellipse( img, 9, 15 ) == 0 );
+  // Test corners - they should be outside the ellipse
+  ASSERT( is_in_ellipse( img, 0, 0 ) == 0 );
+  ASSERT( is_in_ellipse( img, 0, 15 ) == 0 );
+  ASSERT( is_in_ellipse( img, 9, 0 ) == 0 );
+  ASSERT( is_in_ellipse( img, 9, 15 ) == 0 );
   
-//   // Test some points that should be inside
-//   ASSERT( is_in_ellipse( img, 5, 5 ) == 1 );  // Near center
-//   ASSERT( is_in_ellipse( img, 5, 10 ) == 1 ); // Near center
-// }
+  // Test some points that should be inside
+  ASSERT( is_in_ellipse( img, 5, 5 ) == 1 );  // Near center
+  ASSERT( is_in_ellipse( img, 5, 10 ) == 1 ); // Near center
+}
