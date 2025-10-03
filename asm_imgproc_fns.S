@@ -173,13 +173,13 @@ is_in_ellipse:
 	
 	/* outside ellipse - return 0 */
 	movl $0, %eax                        /* load 0 into return register */
-	jmp .Lellipse_done                   /* jump to end */
+	jmp .Lis_in_ellipse_done             /* jump to end */
 	
 .Lin_ellipse:
 	/* inside ellipse - return 1 */
 	movl $1, %eax                        /* load 1 into return register */
 	
-.Lellipse_done:
+.Lis_in_ellipse_done:
 	/* epilogue - restore callee-saved registers */
 	popq %r11
 	popq %r10
@@ -464,7 +464,7 @@ imgproc_ellipse:
 	 *   %ebx - current pixel value
 	 */
 	
-	/* prologue - save callee-saved registers */
+	/* prologue: save callee-saved registers */
 	pushq %rbp
 	movq %rsp, %rbp
 	pushq %r12
@@ -484,7 +484,7 @@ imgproc_ellipse:
 	/* check if row < height */
 	movl IMAGE_HEIGHT_OFFSET(%r12), %eax
 	cmpl %eax, %r14d
-	jge .Lellipse_done
+	jge .Limgproc_ellipse_done
 	
 	/* initialize column counter */
 	movl $0, %r15d
@@ -544,8 +544,8 @@ imgproc_ellipse:
 	incl %r14d
 	jmp .Lellipse_row_loop
 	
-.Lellipse_done:
-	/* epilogue - restore callee-saved registers */
+.Limgproc_ellipse_done:
+	/* epilogue: restore callee-saved registers */
 	popq %rbx
 	popq %r15
 	popq %r14
