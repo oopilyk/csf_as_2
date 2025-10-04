@@ -5,6 +5,7 @@ Contributions:
 - Implemented C transformation functions (imgproc_complement, imgproc_transpose)
 - Created unit tests for all helper functions
 - Implemented the complement and transpose functions in assembly
+- Implemented ellipse functions in assembly
 
 Team member: Jacob Peery
 - Implemented C transformation functions (imgproc_ellipse, imgproc_emboss)
