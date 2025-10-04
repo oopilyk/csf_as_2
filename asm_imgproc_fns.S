@@ -450,19 +450,7 @@ imgproc_transpose:
  */
 	.globl imgproc_ellipse
 imgproc_ellipse:
-	/*
-	 * Transform image by copying only pixels inside centered ellipse
-	 * Parameters:
-	 *   %rdi - pointer to input Image
-	 *   %rsi - pointer to output Image
-	 * 
-	 * Register use:
-	 *   %r12 - input Image pointer
-	 *   %r13 - output Image pointer
-	 *   %r14d - current row
-	 *   %r15d - current column
-	 *   %ebx - current pixel value
-	 */
+	/* Register use: %r12=input, %r13=output, %r14d=row, %r15d=col, %ebx=pixel */
 	
 	/* prologue: save callee-saved registers */
 	pushq %rbp
