@@ -96,7 +96,7 @@ is_in_ellipse:
 	 *   %r11d - y (row - b)
 	 */
 	
-	/* prologue - save callee-saved registers */
+	/* prologue save callee-saved registers */
 	pushq %rbp
 	movq %rsp, %rbp
 	pushq %r8
@@ -106,78 +106,78 @@ is_in_ellipse:
 	
 	/* calculate a = width / 2 */
 	movl IMAGE_WIDTH_OFFSET(%rdi), %eax  /* load width into eax */
-	movl $2, %ecx                        /* load divisor 2 into ecx */
-	cdq                                  /* sign extend eax into edx for division */
-	idivl %ecx                           /* divide width by 2, result in eax */
-	movl %eax, %r8d                      /* store a in r8d */
+	movl $2, %ecx     /* load divisor 2 into ecx */
+	cdq    /* sign extend eax into edx for division */
+	idivl %ecx   /* divide width by 2, result in eax */
+	movl %eax, %r8d    /* store a in r8d */
 	
 	/* calculate b = height / 2 */
 	movl IMAGE_HEIGHT_OFFSET(%rdi), %eax /* load height into eax */
-	cdq                                  /* sign extend eax into edx for division */
-	idivl %ecx                           /* divide height by 2, result in eax */
-	movl %eax, %r9d                      /* store b in r9d */
+	cdq    /* sign extend eax into edx for division */
+	idivl %ecx   /* divide height by 2, result in eax */
+	movl %eax, %r9d   /* store b in r9d */
 	
 	/* calculate x = col - a */
-	movl %edx, %r10d                     /* copy col to r10d */
-	subl %r8d, %r10d                     /* x = col - a, store in r10d */
+	movl %edx, %r10d   /* copy col to r10d */
+	subl %r8d, %r10d   /* x = col - a, store in r10d */
 	
 	/* calculate y = row - b */
-	movl %esi, %r11d                     /* copy row to r11d */
-	subl %r9d, %r11d                     /* y = row - b, store in r11d */
+	movl %esi, %r11d   /* copy row to r11d */
+	subl %r9d, %r11d   /* y = row - b, store in r11d */
 	
 	/* calculate x*x */
-	movl %r10d, %eax                     /* copy x to eax */
-	imull %r10d, %eax                    /* x * x, result in eax */
-	movl %eax, %r10d                     /* store x*x back in r10d */
+	movl %r10d, %eax   /* copy x to eax */
+	imull %r10d, %eax   /* x * x, result in eax */
+	movl %eax, %r10d   /* store x*x back in r10d */
 	
 	/* calculate y*y */
-	movl %r11d, %eax                     /* copy y to eax */
-	imull %r11d, %eax                    /* y * y, result in eax */
-	movl %eax, %r11d                     /* store y*y back in r11d */
+	movl %r11d, %eax   /* copy y to eax */
+	imull %r11d, %eax   /* y * y, result in eax */
+	movl %eax, %r11d   /* store y*y back in r11d */
 	
 	/* calculate 10000 * x*x */
-	movl $10000, %eax                    /* load constant 10000 into eax */
-	imull %r10d, %eax                    /* multiply 10000 by x*x */
-	movl %eax, %r10d                     /* store 10000*x*x in r10d */
+	movl $10000, %eax    /* load constant 10000 into eax */
+	imull %r10d, %eax    /* multiply 10000 by x*x */
+	movl %eax, %r10d     /* store 10000*x*x in r10d */
 	
 	/* calculate 10000 * y*y */
-	movl $10000, %eax                    /* load constant 10000 into eax */
-	imull %r11d, %eax                    /* multiply 10000 by y*y */
-	movl %eax, %r11d                     /* store 10000*y*y in r11d */
+	movl $10000, %eax    /* load constant 10000 into eax */
+	imull %r11d, %eax    /* multiply 10000 by y*y */
+	movl %eax, %r11d     /* store 10000*y*y in r11d */
 	
 	/* calculate a*a */
-	movl %r8d, %eax                      /* load a into eax */
-	imull %r8d, %eax                     /* calculate a*a in eax */
-	movl %eax, %r8d                      /* store a*a back in r8d */
+	movl %r8d, %eax      /* load a into eax */
+	imull %r8d, %eax     /* calculate a*a in eax */
+	movl %eax, %r8d      /* store a*a back in r8d */
 	
 	/* calculate b*b */
-	movl %r9d, %eax                      /* load b into eax */
-	imull %r9d, %eax                     /* calculate b*b in eax */
-	movl %eax, %r9d                      /* store b*b back in r9d */
+	movl %r9d, %eax      /* load b into eax */
+	imull %r9d, %eax     /* calculate b*b in eax */
+	movl %eax, %r9d      /* store b*b back in r9d */
 	
 	/* calculate (10000*x*x) / (a*a) */
-	movl %r10d, %eax                     /* load 10000*x*x into eax */
-	cdq                                  /* sign extend eax for division */
-	idivl %r8d                           /* divide by a*a, result in eax */
-	movl %eax, %r10d                     /* store first term in r10d */
+	movl %r10d, %eax     /* load 10000*x*x into eax */
+	cdq    /* sign extend eax for division */
+	idivl %r8d    /* divide by a*a, result in eax */
+	movl %eax, %r10d     /* store first term in r10d */
 	
 	/* calculate (10000*y*y) / (b*b) */
-	movl %r11d, %eax                     /* load 10000*y*y into eax */
-	cdq                                  /* sign extend eax for division */
-	idivl %r9d                           /* divide by b*b, result in eax */
+	movl %r11d, %eax     /* load 10000*y*y into eax */
+	cdq    /* sign extend eax for division */
+	idivl %r9d   /* divide by b*b, result in eax */
 	
 	/* check if term1 + term2 <= 10000 */
-	addl %r10d, %eax                     /* add first term to second term */
-	cmpl $10000, %eax                    /* compare sum with 10000 */
-	jle .Lin_ellipse                     /* jump if less than or equal to 10000 */
+	addl %r10d, %eax     /* add first term to second term */
+	cmpl $10000, %eax    /* compare sum with 10000 */
+	jle .Lin_ellipse     /* jump if less than or equal to 10000 */
 	
 	/* outside ellipse - return 0 */
-	movl $0, %eax                        /* load 0 into return register */
-	jmp .Lis_in_ellipse_done             /* jump to end */
+	movl $0, %eax        /* load 0 into return register */
+	jmp .Lis_in_ellipse_done /* jump to end */
 	
 .Lin_ellipse:
 	/* inside ellipse - return 1 */
-	movl $1, %eax                        /* load 1 into return register */
+	movl $1, %eax     /* load 1 into return register */
 	
 .Lis_in_ellipse_done:
 	/* epilogue - restore callee-saved registers */
@@ -477,6 +477,15 @@ imgproc_ellipse:
 	movq %rdi, %r12          /* input Image pointer */
 	movq %rsi, %r13          /* output Image pointer */
 	
+	/* a = width/2 and b = height/2 */
+	movl IMAGE_WIDTH_OFFSET(%r12), %eax
+	shrl $1, %eax           /* a = width/2 */
+	movl %eax, %r8d          /* store a in %r8d */
+	
+	movl IMAGE_HEIGHT_OFFSET(%r12), %eax
+	shrl $1, %eax           /* b = height/2 */
+	movl %eax, %r9d          /* store b in %r9d */
+	
 	/* initialize row counter */
 	movl $0, %r14d
 	
@@ -496,40 +505,67 @@ imgproc_ellipse:
 	jge .Lellipse_next_row
 	
 	/* compute index = row * width + col */
-	movq %r12, %rdi          /* Image pointer */
-	movl %r14d, %esi         /* row */
-	movl %r15d, %edx         /* col */
-	call compute_index
-	pushq %rax               /* save index on stack */
+	movl IMAGE_WIDTH_OFFSET(%r12), %eax
+	movl %r14d, %ebx
+	imull %eax, %ebx         /* row * width */
+	addl %r15d, %ebx         /* + col, result in %ebx */
 	
-	/* check if pixel is in ellipse */
-	movq %r12, %rdi          /* Image pointer */
-	movl %r14d, %esi         /* row */
-	movl %r15d, %edx         /* col */
-	call is_in_ellipse
-	cmpl $1, %eax            /* check if result is 1 (inside) */
-	je .Lellipse_copy_pixel  /* jump if inside ellipse */
+	/* calculate x = col - a */
+	movl %r15d, %ecx
+	subl %r8d, %ecx          /* x = col - a */
 	
-	/* outside ellipse - set to opaque black */
-	movl $0, %edi            /* red = 0 */
-	movl $0, %esi            /* green = 0 */
-	movl $0, %edx            /* blue = 0 */
-	movl $255, %ecx          /* alpha = 255 (opaque) */
-	call make_pixel
-	movl %eax, %ebx          /* store black pixel in %ebx */
+	/* calculate y = row - b */
+	movl %r14d, %edx
+	subl %r9d, %edx          /* y = row - b */
+	
+	/* calculate x*x */
+	movl %ecx, %eax
+	imull %eax, %eax         /* x*x */
+	
+	/* calculate (10000 * x*x) / (a*a) */
+	movl $10000, %edi
+	imull %edi, %eax         /* 10000 * x*x */
+	movl %r8d, %edi
+	imull %edi, %edi         /* a*a */
+	testl %edi, %edi
+	jz .Lellipse_outside     /* avoid division by zero */
+	xorl %edx, %edx
+	divl %edi                /* (10000 * x*x) / (a*a) */
+	movl %eax, %esi          /* store term1 in %esi */
+	
+	/* calculate y*y */
+	movl %r14d, %eax         /* reload row */
+	subl %r9d, %eax          /* y = row - b */
+	imull %eax, %eax         /* y*y */
+	
+	/* calculate (10000 * y*y) / (b*b) */
+	movl $10000, %edi
+	imull %edi, %eax         /* 10000 * y*y */
+	movl %r9d, %edi
+	imull %edi, %edi         /* b*b */
+	testl %edi, %edi
+	jz .Lellipse_outside     /* avoid division by zero */
+	xorl %edx, %edx
+	divl %edi                /* (10000 * y*y) / (b*b) */
+	
+	/* check if term1 + term2 <= 10000 */
+	addl %esi, %eax          /* term1 + term2 */
+	cmpl $10000, %eax
+	jg .Lellipse_outside     /* outside ellipse */
+	
+	/* inside ellipse copy original pixel */
+	movq IMAGE_DATA_OFFSET(%r12), %rax  /* get input data pointer */
+	movl (%rax,%rbx,4), %eax            /* load original pixel */
 	jmp .Lellipse_store_pixel
 	
-.Lellipse_copy_pixel:
-	/* inside ellipse - copy original pixel */
-	movq IMAGE_DATA_OFFSET(%r12), %rax  /* get input data pointer */
-	movq (%rsp), %rcx                   /* restore index from stack */
-	movl (%rax,%rcx,4), %ebx            /* load original pixel */
+.Lellipse_outside:
+	/* outside ellipse to black */
+	movl $0x000000ff, %eax   /* black pixel */
 	
 .Lellipse_store_pixel:
 	/* store pixel in output image */
-	popq %rax                           /* restore index from stack */
 	movq IMAGE_DATA_OFFSET(%r13), %rcx  /* get output data pointer */
-	movl %ebx, (%rcx,%rax,4)            /* store pixel */
+	movl %eax, (%rcx,%rbx,4)            /* store pixel */
 	
 	/* increment column */
 	incl %r15d
