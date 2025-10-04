@@ -609,8 +609,227 @@ imgproc_ellipse:
  */
 	.globl imgproc_emboss
 imgproc_emboss:
-	/* TODO: implement */
-	ret
+
+	/*
+	 * Register use:
+	 *   %r12 - input Image pointer
+	 *   %r13 - output Image pointer
+	 *   %r14d - current row
+	 *   %r15d - current column
+	 * Stack locals:
+	 *   -4(%rbp) - current pixel value
+	 *	 -8(%rbp) - top left pixel value
+	 *	 -12(%rbp) - red diff
+	 *	 -16(%rbp) - green diff
+	 *	 -20(%rbp) - blue diff
+	 *	 -24(%rbp) - highest diff
+	 *	 -28(%rbp) - current pixel index
+	 */
+
+	//prologue, save callee safe registers
+	pushq %rbp
+	movq %rsp, %rbp
+	subq $32, %rsp
+	pushq %r12
+	pushq %r13
+	pushq %r14
+	pushq %r15
+
+	//put input into r12, output into r13
+	movq %rdi, %r12
+	movq %rsi, %r13
+	
+	//initialize current row to 0
+	movl $0, %r14d
+
+	//row loop to get all pixels
+	.Lemboss_row_loop:
+
+		//compare current row to total rows, if greater end loop go to end
+		cmpl %r14d, IMAGE_HEIGHT_OFFSET(%r12)
+		jle .Lemboss_done
+
+		//initialize current col to 0
+		movl $0, %r15d
+
+		//col loop to get all pixels
+		.Lemboss_col_loop:
+
+			//see if current col greater than width, if so, next row
+			cmpl %r15d, IMAGE_WIDTH_OFFSET(%r12)
+			jle .Lemboss_next_row
+
+			//put parameters and call compute index to find current pixel
+			movq %r12, %rdi
+			movl %r14d, %esi
+			movl %r15d, %edx
+			call compute_index
+
+			//put the found pixel into -4(%rbp), and index into -28(%rbp)
+			movl %eax, -28(%rbp) /* save index in -24(%rbp) */
+			movl %eax, %ecx /* put index in %ecx in order to load pixel */
+			// load pixel from input image
+			movq IMAGE_DATA_OFFSET(%r12), %rax /* put data pointer for the input image into rax */
+			movl (%rax,%rcx,4), %eax /* load pixel into %eax */
+			movl %eax, -4(%rbp) /* store into local variable */
+
+
+			//see if the row is 0, if so, go to set pixel 128, else continue with diff
+			cmpl $0, %r14d 
+			jz .Lemboss_set_pixel_128
+
+			//see if the col is 0, if so go to set pixel 128, else continue with diff
+			cmpl $0, %r15d
+			jz .Lemboss_set_pixel_128
+
+			//continue with regular find difference of top left and set to max diff:
+
+
+			//find index of the upper left pixel, subtract 1 from row and col and call again
+			subl $1, %esi
+			subl $1, %edx
+			call compute_index
+	
+
+			//put the found pixel into -8(%rbp)
+			movl %eax, %ecx /* save index in %ecx in order to load pixel*/
+			// load pixel from input image
+			movq IMAGE_DATA_OFFSET(%r12), %rax /* put data pointer for the input image into rax */
+			movl (%rax,%rcx,4), %edx /* load pixel into %edx */
+			movl %edx, -8(%rbp) /* store into -8(%rbp) */
+
+			//get red value of top left and put in -12(%rbp)
+			movl -8(%rbp), %edi
+			call get_r
+			movl %eax, -12(%rbp)
+
+			//get green value of top left and put in -16(%rbp)
+			call get_g
+			movl %eax, -16(%rbp)
+
+			//get blue value of top left and put in -20(%rbp)
+			call get_b
+			movl %eax, -20(%rbp)
+
+			//get red value of current and subtract it from top left red value to store in -12(%rbp)
+			movl -4(%rbp), %edi
+			call get_r
+			subl %eax, -12(%rbp) /* now current red diff, nr - r, in -12(%rbp) */
+
+			//get green value of current and subtract it from top left red value to store in -16(%rbp)
+			call get_g
+			subl %eax, -16(%rbp) /* now current red diff, nb - b, in -16(%rbp) */
+
+			//get red value of current and subtract it from top left red value to store in -12(%rbp)
+			call get_b
+			subl %eax, -20(%rbp) /* now current red diff, ng - g, in -20(%rbp) */
+
+			//begin by moving red diff in highest diff, and putting it into %eax
+			movl -12(%rbp), %eax
+			movl %eax, -24(%rbp)
+
+			//absolute value of highest diff (red right now)
+			cmpl $0, %eax
+			jge .Lskip_negate_for_abs1
+			negl %eax /* negate if %eax is negative to become positive */
+			.Lskip_negate_for_abs1:
+
+			//put green diff into %ecx
+			movl -16(%rbp), %ecx
+
+			//absolute value of green diff
+			cmpl $0, %ecx
+			jge .Lskip_negate_for_abs2
+			negl %ecx /* negate if %ecx is negative to become positive */
+			.Lskip_negate_for_abs2:
+
+			//compare abs green diff to current abs highest diff (red right now)
+			cmpl %ecx, %eax
+			jge .Lcurrent_highest_still_higher1
+			movl %ecx, %eax /* put current highest absolute value (green) into %eax */
+			movl -16(%rbp), %edx /* put current highest regular value (green) into %edx */
+			movl %edx, -24(%rbp) /* then into -24(%rbp) */
+			.Lcurrent_highest_still_higher1:
+
+			//put blue diff into %ecx
+			movl -20(%rbp), %ecx
+
+			//absolute value of blue diff
+			cmpl $0, %ecx
+			jge .Lskip_negate_for_abs3
+			negl %ecx /* negate if %ecx is negative to become positive */
+			.Lskip_negate_for_abs3:
+
+			//compare abs blue diff to currrent abs highest diff (red or green right now)
+			cmpl %ecx, %eax
+			jge .Lcurrent_highest_still_higher2
+			movl %ecx, %eax /* put current highest absolute value (blue) into %eax */
+			movl -20(%rbp), %edx /* put current highest regular value (blue) into %edx */
+			movl %edx, -24(%rbp) /* then into -24(%rbp) */
+			.Lcurrent_highest_still_higher2:
+
+			//current highest value is in -24(%rbp), calc gray with that
+			addl $128, -24(%rbp)
+
+			//if gray is > 255, set to 255, else, go to val over is okay
+			cmpl $255, -24(%rbp)
+			jle .Lgray_val_over_is_okay
+
+			movl $255, -24(%rbp) /* if greater than 255, will set to 255 because it didnt jump to over is okay */
+			jmp .Lgray_val_is_good /* gray is good if was set to 255, so skip checking if less than 0 */
+
+			//if gray is < 0, set to 0, else val is okay
+			.Lgray_val_over_is_okay:
+			cmpl $0, -24(%rbp)
+		
+			jg .Lgray_val_is_good /* if -24(%rbp) is positive or 0, skip ahead to is good */
+			movl $0, -24(%rbp) /* else set to 0 and val is good now */
+
+			//gray value is correct 
+			.Lgray_val_is_good:
+
+			//put gray values into parameters to make pixel
+			movl -24(%rbp), %edi
+			movl -24(%rbp), %esi
+			movl -24(%rbp), %edx
+			jmp .Lcontinue_emboss /* skip setting values to 128 */
+
+			//if top row or left col, set to 128
+			.Lemboss_set_pixel_128:
+			//if pixel is in top row or left column set r g b to 128
+			movl $128, %edi
+			movl $128, %esi
+			movl $128, %edx
+
+			.Lcontinue_emboss:
+			andl $0xFF, -4(%rbp) /* get original alpha value and put into %ecx*/
+			movl -4(%rbp), %ecx
+			call make_pixel
+
+			//put pixel into output image
+
+			movq IMAGE_DATA_OFFSET(%r13), %rdi /* put data pointer for the output image into %rdi, pixel in %eax */
+			movl -28(%rbp), %ecx /* put index into %ecx */
+			movl %eax, (%rdi, %rcx, 4) /* move the current pixel into output image at index */
+
+			incl %r15d /* increment col, restart col loop */
+			jmp .Lemboss_col_loop
+			
+		.Lemboss_next_row:
+		//increment row, restart row loop
+		incl %r14d
+		jmp .Lemboss_row_loop
+
+	.Lemboss_done:
+		popq %r15
+		popq %r14
+		popq %r13
+		popq %r12
+		addq $32, %rsp
+		popq %rbp 
+		ret
+
+
 
 /*
 vim:ft=gas:

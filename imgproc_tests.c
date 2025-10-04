@@ -93,7 +93,7 @@ void test_complement_basic( TestObjs *objs );
 void test_transpose_basic( TestObjs *objs );
 
 void test_ellipse_basic( TestObjs *objs );
-// void test_emboss_basic( TestObjs *objs );
+void test_emboss_basic( TestObjs *objs );
 
 // Test functions for helper functions
 void test_get_r( TestObjs *objs );
@@ -130,7 +130,7 @@ int main( int argc, char **argv ) {
   TEST( test_transpose_basic );
   
   TEST( test_ellipse_basic );
-  // TEST( test_emboss_basic );
+  TEST( test_emboss_basic );
 
   TEST_FINI();
 }
@@ -359,37 +359,37 @@ void test_ellipse_basic( TestObjs *objs ) {
 
   destroy_img( smiley_ellipse_expected );
 }
-// 
-// void test_emboss_basic( TestObjs *objs ) {
-//   struct Picture smiley_emboss_expected_pic = {
-//     {
-//       { ' ', 0x000000ff },
-//       { 'a', 0x808080ff },
-//       { 'b', 0xffffffff },
-//     },
-//     16, // width
-//     10, // height
-//     "aaaaaaaaaaaaaaaa"
-//     "aaaba       baaa"
-//     "aaba abaabaaa aa"
-//     "aba aaa aa aaaba"
-//     "ab aaaaaaaaaaab "
-//     "ab aabaaaabaaab "
-//     "aa aaa bbba aba "
-//     "aaa aaa    aba a"
-//     "aaaabbbbbbbba aa"
-//     "aaaaa        aaa"
-//   };
 
-//   struct Image *smiley_emboss_expected =
-//     picture_to_img( &smiley_emboss_expected_pic );
+void test_emboss_basic( TestObjs *objs ) {
+  struct Picture smiley_emboss_expected_pic = {
+    {
+      { ' ', 0x000000ff },
+      { 'a', 0x808080ff },
+      { 'b', 0xffffffff },
+    },
+    16, // width
+    10, // height
+    "aaaaaaaaaaaaaaaa"
+    "aaaba       baaa"
+    "aaba abaabaaa aa"
+    "aba aaa aa aaaba"
+    "ab aaaaaaaaaaab "
+    "ab aabaaaabaaab "
+    "aa aaa bbba aba "
+    "aaa aaa    aba a"
+    "aaaabbbbbbbba aa"
+    "aaaaa        aaa"
+  };
 
-//   imgproc_emboss( objs->smiley, objs->smiley_out );
+  struct Image *smiley_emboss_expected =
+    picture_to_img( &smiley_emboss_expected_pic );
 
-//   ASSERT( images_equal( objs->smiley_out, smiley_emboss_expected ) );
+  imgproc_emboss( objs->smiley, objs->smiley_out );
 
-//   destroy_img( smiley_emboss_expected );
-// }
+  ASSERT( images_equal( objs->smiley_out, smiley_emboss_expected ) );
+
+  destroy_img( smiley_emboss_expected );
+}
 
 ////////////////////////////////////////////////////////////////////////
 // Helper function tests
